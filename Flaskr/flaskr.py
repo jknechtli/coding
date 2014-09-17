@@ -1,10 +1,13 @@
 # all the imports
+from __future__ import print_function
+
 import sqlite3
 from contextlib import closing	
 from flask import Flask, request, session, g, redirect, url_for, \
 	abort, render_template, flash
+from forms import LoginForm, RegistrationForm
+from wtforms import Form, BooleanField, TextField, PasswordField, validators
 
-from forms import LoginForm
 	
 #configuration
 DATABASE = 'db/flaskr.db'
@@ -27,6 +30,7 @@ def init_db():
 		with app.open_resource('schema.sql', mode='r') as f:
 			db.cursor().executescript(f.read())
 		db.commit()
+
 	
 @app.before_request
 def before_request():
@@ -57,21 +61,41 @@ def add_entry():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
 	form = LoginForm()
-
-	if form.validate_on_submit():
+	print (form.username)
+	print (form.password)
+	
+	if form.validate():#_on_submit():
 		username = form.username.data
 		password = form.password.data		
 		
-		if username == app.config['USERNAME'] and password == app.config['PASSWORD']:
+		cur = g.db.execute('top 1 select username from users where username = ? and password = ?', [username, password])
+		user = cur.fetchall()
+		
+		if user is not None:		
 			session['logged_in'] = True
 			flash('You were logged in')
 			return redirect(url_for('show_entries'))
 		else:
 			form.errors['username'] = ['Incorrect username or password']
 			form.errors['password'] = ['Incorrect username or password']
-	
-	return render_template('login.html', form=form)
 
+	return render_template('login.html', form=form)	
+	
+	
+	
+@app.route('/register', methods=['GET', 'POST'])
+def register():	
+	form = RegistrationForm(request.form)
+	
+	if request.method == 'POST' and form.validate():
+		g.db.execute('insert into users(username,password) values (?, ?)', [form.username.data, form.password.data])
+		g.db.commit()
+		flash('Thanks for registering')
+		return redirect(url_for('login'))
+		
+	return render_template('register.html', form=form)
+
+	
 @app.route('/logout')
 def logout():
 	session.pop('logged_in', None)
