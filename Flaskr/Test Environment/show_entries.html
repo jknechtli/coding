@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+{% block body %}
+<div class="row">
+
+	{% if session.logged_in %}
+	
+	
+	<div class="col-md-6">
+		<div class="panel panel-default">
+			<div class="panel-body">
+				<form action="{{ url_for('add_entry') }}" method="post">
+					<div class="form-group">
+						<label for="title">Name:</label>
+						<dd><input type="text" class="form-control" name="title" id="title" placeholder="e.g. John" autofocus="true">
+					</div>
+					<div class="form-group">
+						<label for="text">Text:</label>
+						<textarea name="text" id="text" class="form-control" placeholder="Text" rows=5 cols=40></textarea>
+					</div>
+					<button class="btn btn-primary pull-right" type="submit">Share</button>
+				</form>
+			</div>
+		</div>
+	</div>
+	<div class="col-md-6">
+		{% else %}
+		<div class="col-md-12">
+			{% endif %}	
+			<ul class="list-unstyled">
+				{% for entry in entries %}
+				<div class="well">
+					<li>
+						<h2>{{ entry.title }}</h2>
+						<div>{{ entry.text | safe }}</div>
+						<span class="glyphicon glyphicon-thumbs-up"></span>
+						<a href="#">Likes <span class="badge">0</span></a>
+						<span class="glyphicon glyphicon-thumbs-down"></span>
+						<a href="#">Dislike <span class="badge">0</span></a>
+					</li>
+				</div>
+			{% else %}
+				<li class="bg-info">
+					<em>Unbelievable. No entries here so far</em>
+				</li>
+			{% endfor %}
+			</ul>
+		</div>
+	</div>	
+{% endblock %}.
