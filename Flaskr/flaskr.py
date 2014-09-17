@@ -60,18 +60,17 @@ def add_entry():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-	form = LoginForm()
-	print (form.username)
-	print (form.password)
+	form = LoginForm(request.form)
 	
-	if form.validate():#_on_submit():
+	#_on_submit():
+	if form.validate(): 
 		username = form.username.data
 		password = form.password.data		
 		
-		cur = g.db.execute('top 1 select username from users where username = ? and password = ?', [username, password])
+		cur = g.db.execute('select username from users where username = ? and password = ?', [username, password])
 		user = cur.fetchall()
 		
-		if user is not None:		
+		if user is not None:
 			session['logged_in'] = True
 			flash('You were logged in')
 			return redirect(url_for('show_entries'))
@@ -113,4 +112,6 @@ def counter():
 
 	
 if __name__ == '__main__':
-	app.run(host="10.0.0.18", port=int("80"))#school="10.222.186.196", home="192.168.0.10", tafe="172.31.31.95", work xp="10.0.0.12
+	app.run()
+    #app.run(host="10.0.0.18", port=int("80"))
+    #school="10.222.186.196", home="192.168.0.10", tafe="172.31.31.95", work xp="10.0.0.12
